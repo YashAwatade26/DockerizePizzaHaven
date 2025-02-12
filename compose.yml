@@ -23,7 +23,7 @@ services:
 
   main-service:
     build:
-      context: ./main-service
+      context: ./backend/spring_boot_backend_template2
     container_name: main-service
     ports:
       - "8081:8081"
@@ -46,8 +46,8 @@ services:
 
   react-app:
     build:
-      context: ./react-app
-    container_name: react-app
+      context: ./frontend
+    container_name: frontend
     ports:
       - "5173:80"  # Nginx will serve the app on port 80, mapped to 5173
     depends_on:
