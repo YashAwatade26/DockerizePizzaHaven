@@ -1,0 +1,26 @@
+# Use Node.js as a base image to build the app
+FROM node:18-alpine as build
+WORKDIR /app
+
+# Copy package.json and install dependencies
+COPY package.json package-lock.json ./
+RUN npm install
+
+# Copy the rest of the project files
+COPY . ./
+
+# Build the Vite project
+RUN npm run build
+
+# Serve React app using Nginx
+FROM nginx:alpine
+WORKDIR /usr/share/nginx/html
+
+# Copy Vite build output (dist/) to Nginx's serving directory
+COPY --from=build /app/dist .
+
+# Expose the standard HTTP port
+EXPOSE 80
+
+# Start Nginx
+CMD ["nginx", "-g", "daemon off;"]

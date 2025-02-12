@@ -1,0 +1,79 @@
+version: '3.8'
+
+services:
+  discovery:
+    build:
+      context: ./discovery
+    container_name: discovery
+    ports:
+      - "8761:8761"
+    networks:
+      - app-network
+
+  gateway:
+    build:
+      context: ./gateway
+    container_name: gateway
+    ports:
+      - "8080:8080"
+    depends_on:
+      - discovery
+    networks:
+      - app-network
+
+  main-service:
+    build:
+      context: ./main-service
+    container_name: main-service
+    ports:
+      - "8081:8081"
+    depends_on:
+      - discovery
+      - mysql
+    networks:
+      - app-network
+
+  email-service:
+    build:
+      context: ./email-service
+    container_name: email-service
+    ports:
+      - "8082:8082"
+    depends_on:
+      - discovery
+    networks:
+      - app-network
+
+  react-app:
+    build:
+      context: ./react-app
+    container_name: react-app
+    ports:
+      - "5173:80"  # Nginx will serve the app on port 80, mapped to 5173
+    depends_on:
+      - gateway
+    networks:
+      - app-network
+
+  mysql:
+    image: mysql:8.0
+    container_name: mysql-db
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: mydb
+      MYSQL_USER: user
+      MYSQL_PASSWORD: password
+    ports:
+      - "3306:3306"
+    volumes:
+      - mysql-data:/var/lib/mysql
+    networks:
+      - app-network
+
+volumes:
+  mysql-data:
+
+networks:
+  app-network:
+    driver: bridge
